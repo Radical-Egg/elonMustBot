@@ -5,6 +5,7 @@ import tweepy
 from os import environ
 import requests
 import random
+import re
 
 
 class Elon:
@@ -81,11 +82,12 @@ class Elon:
         # querying
         querystring = {
             "object":self.getNoun(),
-            "subject":"Elon Must",
+            "subject":"Elon",
             "verb": self.getVerb(), 
             "subjdet": "-", 
             "objdet": "-",
-            "tense": self.getTense()
+            "tense": "present",
+            "modal": "must"
         }
         # headers
         headers = {
@@ -108,11 +110,24 @@ class Elon:
             'text': self.getElonSentence(), # using data from getElonSentence
         },
         headers={'api-key': self.deepAPI})
-        
+
         try:
-            return r.json()['output'][:280] # return up to 280 characters, i want to fix the white space so i can fit more but works for now
+            marker = 280
+            responseOutputRaw = r.json()['output'][:marker]
+            addedString = ""
+            separator = " "
+
+            for word in responseOutputRaw.split(): # loop through string - trying to find punctuation to end at a good point
+                addedString = separator.join((addedString, word))
+                count = len(addedString)
+
+                if re.search(r'^.+[\!\.\?]{1}$', word): 
+                    marker = count
+                
+            return addedString[:marker]
         except:
-            print(r.json()) #print what is wrong if no output
+            print(r.json())
+            return r.json()
 
 class tweet:
         def connect(self):
@@ -144,21 +159,21 @@ class tweet:
             self.api = None
             self.auth = None
 
-            self.connect()
+            self.connect() # connecting to twitter API
 
 if __name__ == "__main__":
     # making elon and tweet objects
     elon = Elon()
-    tweeting = tweet()
+    #tweeting = tweet()
     
     # storing strings into var to make less typing in future
     elonPara = elon.getElonParagraph()
-    elonSentence = elon.getElonSentence()
+    print(elonPara)
+    #elonSentence = elon.getElonSentence()
 
     # example of tweeting out a sentence and then a paragraph
-    tweeting.tweetTextConent(elonSentence)
-    tweeting.tweetTextConent(elonPara)
-
+    #tweeting.tweetTextConent(elonSentence)
+    #tweeting.tweetTextConent(elonPara)
 
 
             
