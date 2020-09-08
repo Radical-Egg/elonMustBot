@@ -8,6 +8,7 @@ import random
 
 
 class Elon:
+    # init function with API Keys
     def __init__(self):
         self.rapidAPI = environ['ElonBot_RAPID_API_KEY']
         self.deepAPI = environ['ElonBot_DEEPAI_API_KEY']
@@ -47,20 +48,21 @@ class Elon:
                     randomPrep = prep
             f.close()
 
-        verb_phrase = randomVerb + " " + randomPrep
+        verb_phrase = randomVerb + " " + randomPrep # combining verb and prep
 
         return verb_phrase
     def getNoun(self):
+        # file path and increment vars
         nouns_fp = "/mnt/nfs/home/pi/share/git/elonMustBot/data/nouns.json"
         size = 0
         t = 0
-
+        # opening up the file, getting the data
         with open(nouns_fp, 'r') as f:
             data = json.load(f)
             size = len(data['nouns'])
             randomAssignment = random.randrange(size)
 
-            for noun in data['nouns']:
+            for noun in data['nouns']: # looping through the nouns, getting a random one
                 t += 1
                 if t == randomAssignment:
                     randomNoun = noun
@@ -68,15 +70,15 @@ class Elon:
             f.close()
 
         return randomNoun
-    def getTense(self):
+    def getTense(self): # getting the tense
         tense = ['past', 'present', 'future']
         size = len(tense)
 
         return tense[random.randrange(size)]
 
-    def getElonSentence(self):
+    def getElonSentence(self): # getting sentence from linqua tools API using the getter functions above
         url = "https://linguatools-sentence-generating.p.rapidapi.com/realise"
-
+        # querying
         querystring = {
             "object":self.getNoun(),
             "subject":"Elon Must",
@@ -85,30 +87,32 @@ class Elon:
             "objdet": "-",
             "tense": self.getTense()
         }
-
+        # headers
         headers = {
             'x-rapidapi-host': "linguatools-sentence-generating.p.rapidapi.com",
             'x-rapidapi-key': self.rapidAPI
             }
-
+        # reponse
         response = requests.request("GET", url, headers=headers, params=querystring)
 
+        # putting the sentence into variable
         randomSentence = response.json()['sentence']
 
         return randomSentence
 
+    # function for POST for paragraph
     def getElonParagraph(self):
         r = requests.post(
         "https://api.deepai.org/api/text-generator",
         data={
-            'text': self.getElonSentence(),
+            'text': self.getElonSentence(), # using data from getElonSentence
         },
         headers={'api-key': self.deepAPI})
         
         try:
-            return r.json()['output'][:280]
+            return r.json()['output'][:280] # return up to 280 characters, i want to fix the white space so i can fit more but works for now
         except:
-            print(r.json())
+            print(r.json()) #print what is wrong if no output
 
 class tweet:
         def connect(self):
@@ -131,6 +135,8 @@ class tweet:
                 print("Auth OK")
             except:
                 print("Something went wrong")
+
+        # tweeting string content
         def tweetTextConent(self, sentence):
             self.api.update_status(sentence)
             print("Successfully tweeted {}".format(sentence))
@@ -141,12 +147,15 @@ class tweet:
             self.connect()
 
 if __name__ == "__main__":
+    # making elon and tweet objects
     elon = Elon()
     tweeting = tweet()
     
+    # storing strings into var to make less typing in future
     elonPara = elon.getElonParagraph()
     elonSentence = elon.getElonSentence()
 
+    # example of tweeting out a sentence and then a paragraph
     tweeting.tweetTextConent(elonSentence)
     tweeting.tweetTextConent(elonPara)
 
