@@ -105,7 +105,10 @@ class Elon:
         },
         headers={'api-key': self.deepAPI})
         
-        print(r.json()['output'])
+        try:
+            return r.json()['output'][:280]
+        except:
+            print(r.json())
 
 class tweet:
         def connect(self):
@@ -139,9 +142,13 @@ class tweet:
 
 if __name__ == "__main__":
     elon = Elon()
-    test = elon.getElonSentence()
     tweeting = tweet()
-    tweeting.tweetTextConent(test)
+    
+    elonPara = elon.getElonParagraph()
+    elonSentence = elon.getElonSentence()
+
+    tweeting.tweetTextConent(elonSentence)
+    tweeting.tweetTextConent(elonPara)
 
 
 
