@@ -6,6 +6,8 @@ from os import environ
 import requests
 import random
 import re
+from datetime import datetime
+import time
 
 
 class Elon:
@@ -18,8 +20,8 @@ class Elon:
     def getVerb(self):
 
         # file paths and other variables
-        verb_fp = "/mnt/nfs/home/pi/share/git/elonMustBot/data/verbs.json"
-        preposition_fp = "/mnt/nfs/home/pi/share/git/elonMustBot/data/prepositions.json"
+        verb_fp = "/Users/egg/red-panda/egg_data/git/elonMustBot/data/verbs.json"
+        preposition_fp = "/Users/egg/red-panda/egg_data/git/elonMustBot/data/prepositions.json"
         size = 0
         t = 0
         q = 0
@@ -54,7 +56,7 @@ class Elon:
         return verb_phrase
     def getNoun(self):
         # file path and increment vars
-        nouns_fp = "/mnt/nfs/home/pi/share/git/elonMustBot/data/nouns.json"
+        nouns_fp = "/Users/egg/red-panda/egg_data/git/elonMustBot/data/nouns.json"
         size = 0
         t = 0
         # opening up the file, getting the data
@@ -162,18 +164,47 @@ class tweet:
             self.connect() # connecting to twitter API
 
 if __name__ == "__main__":
-    # making elon and tweet objects
-    elon = Elon()
-    #tweeting = tweet()
-    
-    # storing strings into var to make less typing in future
-    elonPara = elon.getElonParagraph()
-    print(elonPara)
-    #elonSentence = elon.getElonSentence()
 
-    # example of tweeting out a sentence and then a paragraph
-    #tweeting.tweetTextConent(elonSentence)
-    #tweeting.tweetTextConent(elonPara)
+    while True:
+        # get date/time
+        now = datetime.now()
+
+        # get current time in correct format
+        current_time = now.strftime("%H:%M:%S")
+
+        # making elon and tweet objects
+        elon = Elon()
+        tweeting = tweet()
+
+        #tweet
+        if current_time > "11:00:00":
+            elonSentence = elon.getElonSentence()
+            try:
+                tweeting.tweetTextConent(elonSentence)
+                print("Tweeted " + elonSentence)
+            except:
+                print("Something went wrong sentence function")
+        else:
+            elonPara = elon.getElonParagraph()
+
+            try:    
+                tweeting.tweetTextConent(elonPara)
+                print("Tweeted " + elonPara)
+            except:
+                print("Somethign went wrong with paragraph function")
+
+        del elon
+        del tweeting
+
+        print("Waiting 12 hours")
+        #wait 12 hours to tweet again
+        time.sleep(43200)
+        print("kicking back off")
+
+            
+
+
+
 
 
             
